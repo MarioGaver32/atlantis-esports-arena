@@ -1,0 +1,824 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Atlantis E-Sports Arena — Consolas y videojuegos</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --abyss:#071620;
+    --abyss-2:#0d2733;
+    --abyss-3:#123542;
+    --teal:#3fddc4;
+    --teal-dim:#3fddc433;
+    --gold:#d4af37;
+    --gold-dim:#d4af3733;
+    --foam:#eaf6f4;
+    --slate:#8fb3b8;
+    --coral:#ff7a59;
+    --line:#1c3f4c;
+    --radius:14px;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html{scroll-behavior:smooth;}
+  body{
+    background:var(--abyss);
+    color:var(--foam);
+    font-family:'Space Grotesk', sans-serif;
+    line-height:1.5;
+    overflow-x:hidden;
+  }
+  h1,h2,h3, .logo-word{
+    font-family:'Cinzel', serif;
+    font-weight:700;
+    letter-spacing:.02em;
+  }
+  .mono{ font-family:'JetBrains Mono', monospace; }
+  a{ color:inherit; text-decoration:none; }
+  img,svg{ display:block; max-width:100%; }
+  .wrap{ max-width:1180px; margin:0 auto; padding:0 28px; }
+  ::selection{ background:var(--teal); color:var(--abyss); }
+
+  /* focus visibility */
+  a:focus-visible, button:focus-visible{
+    outline:2px solid var(--teal);
+    outline-offset:3px;
+  }
+
+  /* ---------- background caustics + bubbles ---------- */
+  .ocean-bg{
+    position:fixed; inset:0; z-index:-2;
+    background:
+      radial-gradient(1100px 700px at 15% -10%, #0e3140 0%, transparent 60%),
+      radial-gradient(900px 600px at 100% 20%, #0a2732 0%, transparent 55%),
+      linear-gradient(180deg, #061420 0%, #071620 40%, #050f17 100%);
+  }
+  .caustics{
+    position:fixed; inset:0; z-index:-1; opacity:.35; pointer-events:none;
+    background-image:
+      repeating-linear-gradient(115deg, transparent 0 60px, #3fddc41a 60px 62px, transparent 62px 140px),
+      repeating-linear-gradient(65deg, transparent 0 90px, #d4af3714 90px 92px, transparent 92px 190px);
+    animation: drift 22s linear infinite;
+  }
+  @keyframes drift{
+    0%{ background-position: 0 0, 0 0; }
+    100%{ background-position: 400px 200px, -300px -260px; }
+  }
+  .bubbles{ position:fixed; inset:0; z-index:-1; overflow:hidden; pointer-events:none; }
+  .bubble{
+    position:absolute; bottom:-40px; border-radius:50%;
+    background:radial-gradient(circle at 30% 30%, #ffffff55, #3fddc41a 70%);
+    animation:rise linear infinite;
+  }
+  @keyframes rise{
+    0%{ transform:translateY(0) translateX(0); opacity:0; }
+    10%{ opacity:.6; }
+    100%{ transform:translateY(-115vh) translateX(20px); opacity:0; }
+  }
+  @media (prefers-reduced-motion: reduce){
+    .caustics, .bubble{ animation:none !important; }
+  }
+
+  /* ---------- header ---------- */
+  header{
+    position:sticky; top:0; z-index:50;
+    background:#071620cc;
+    backdrop-filter: blur(10px);
+    border-bottom:1px solid var(--line);
+  }
+  .nav{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:16px 28px;
+  }
+  .brand{ display:flex; align-items:center; gap:12px; }
+  .trident{ width:30px; height:30px; filter:drop-shadow(0 0 6px var(--teal)); }
+  .logo-word{ font-size:1.05rem; letter-spacing:.12em; }
+  .logo-word small{ display:block; font-family:'Space Grotesk',sans-serif; font-weight:500; font-size:.6rem; letter-spacing:.32em; color:var(--teal); margin-top:2px; }
+
+  nav.links{ display:flex; gap:34px; }
+  nav.links a{
+    font-size:.85rem; letter-spacing:.05em; color:var(--slate);
+    position:relative; padding-bottom:4px; transition:color .2s;
+  }
+  nav.links a::after{
+    content:''; position:absolute; left:0; bottom:0; width:0; height:1px;
+    background:var(--teal); transition:width .25s;
+  }
+  nav.links a:hover{ color:var(--foam); }
+  nav.links a:hover::after{ width:100%; }
+
+  .nav-cta{
+    display:inline-flex; align-items:center; gap:8px;
+    background:var(--coral); color:#1a0d08; font-weight:600; font-size:.82rem;
+    padding:10px 18px; border-radius:999px; letter-spacing:.02em;
+    box-shadow:0 0 0 1px #ff7a5955, 0 8px 20px -8px #ff7a5988;
+    transition:transform .2s, box-shadow .2s;
+  }
+  .nav-cta:hover{ transform:translateY(-2px); box-shadow:0 0 0 1px #ff7a59aa, 0 12px 24px -8px #ff7a59aa; }
+
+  .burger{ display:none; background:none; border:1px solid var(--line); border-radius:8px; padding:8px 10px; color:var(--foam); }
+
+  /* ---------- hero ---------- */
+  .hero{
+    position:relative;
+    padding:110px 28px 90px;
+    text-align:center;
+  }
+  .eyebrow{
+    display:inline-flex; align-items:center; gap:10px;
+    font-family:'JetBrains Mono',monospace; font-size:.72rem; letter-spacing:.18em;
+    color:var(--teal); text-transform:uppercase;
+    border:1px solid var(--teal-dim); background:#3fddc40d;
+    padding:7px 16px; border-radius:999px; margin-bottom:28px;
+  }
+  .eyebrow .dot{ width:6px; height:6px; border-radius:50%; background:var(--teal); box-shadow:0 0 8px var(--teal); }
+
+  .hero h1{
+    font-size:clamp(2.4rem, 6vw, 4.6rem);
+    line-height:1.06;
+    background:linear-gradient(180deg, var(--foam) 30%, var(--teal) 100%);
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+    max-width:920px; margin:0 auto;
+  }
+  .hero h1 .gold{
+    background:linear-gradient(180deg, var(--gold) 20%, #f4d976 100%);
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+  }
+  .hero p.sub{
+    max-width:560px; margin:26px auto 40px; color:var(--slate); font-size:1.05rem;
+  }
+  .hero-ctas{ display:flex; gap:16px; justify-content:center; flex-wrap:wrap; }
+  .btn{
+    display:inline-flex; align-items:center; gap:10px;
+    padding:15px 30px; border-radius:999px; font-weight:600; font-size:.92rem;
+    letter-spacing:.02em; transition:transform .2s, box-shadow .2s, background .2s;
+    border:1px solid transparent; cursor:pointer;
+  }
+  .btn-primary{
+    background:linear-gradient(180deg, var(--teal), #22b39c);
+    color:#052420; box-shadow:0 10px 30px -10px #3fddc499;
+  }
+  .btn-primary:hover{ transform:translateY(-2px); box-shadow:0 14px 34px -8px #3fddc4bb; }
+  .btn-ghost{
+    border-color:var(--line); color:var(--foam); background:#0d273366;
+  }
+  .btn-ghost:hover{ border-color:var(--teal); color:var(--teal); }
+
+  .hero-emblem{
+    margin:64px auto 0; width:120px; height:120px; position:relative;
+  }
+  .hero-emblem svg{ width:100%; height:100%; filter:drop-shadow(0 0 22px #3fddc477); animation:float 5s ease-in-out infinite; }
+  @keyframes float{ 0%,100%{ transform:translateY(0);} 50%{ transform:translateY(-10px);} }
+
+  /* trust bar */
+  .trust{
+    border-top:1px solid var(--line); border-bottom:1px solid var(--line);
+    background:#0a212c88;
+  }
+  .trust .wrap{
+    display:grid; grid-template-columns:repeat(5,1fr); gap:24px;
+    padding:26px 28px;
+  }
+  .trust-item{ display:flex; align-items:center; gap:12px; }
+  .trust-item svg{ width:22px; height:22px; color:var(--teal); flex-shrink:0; }
+  .trust-item span{ font-size:.82rem; color:var(--slate); }
+
+  /* ---------- depth marker (section eyebrow / signature device) ---------- */
+  .depth{
+    display:flex; align-items:center; gap:16px; margin:0 0 14px;
+  }
+  .depth::before, .depth::after{
+    content:''; flex:1; height:1px;
+    background:linear-gradient(90deg, transparent, var(--line), transparent);
+  }
+  .depth-label{
+    font-family:'JetBrains Mono',monospace; font-size:.72rem; letter-spacing:.16em;
+    color:var(--gold); white-space:nowrap; text-transform:uppercase;
+  }
+
+  section{ padding:90px 0; position:relative; }
+  .section-head{ max-width:640px; margin:0 auto 52px; text-align:center; }
+  .section-head h2{ font-size:clamp(1.8rem,3.4vw,2.6rem); margin-bottom:14px; }
+  .section-head p{ color:var(--slate); font-size:1rem; }
+
+  /* ---------- catalog ---------- */
+  .tier-block{ margin-bottom:64px; }
+  .tier-title{
+    display:flex; align-items:baseline; gap:12px; margin-bottom:22px;
+  }
+  .tier-title h3{ font-size:1.3rem; }
+  .tier-badge{
+    font-family:'JetBrains Mono',monospace; font-size:.68rem; letter-spacing:.1em;
+    padding:4px 10px; border-radius:999px; text-transform:uppercase;
+  }
+  .tier-legendary .tier-badge{ background:var(--gold-dim); color:var(--gold); border:1px solid #d4af3755; }
+  .tier-elite .tier-badge{ background:var(--teal-dim); color:var(--teal); border:1px solid #3fddc455; }
+  .tier-clasica .tier-badge{ background:#8fb3b81a; color:var(--slate); border:1px solid #8fb3b840; }
+
+  .grid{
+    display:grid; grid-template-columns:repeat(3, 1fr); gap:22px;
+  }
+  .card{
+    position:relative;
+    background:linear-gradient(180deg, var(--abyss-2), #0a212c);
+    border:1px solid var(--line); border-radius:var(--radius);
+    padding:26px; overflow:hidden;
+    transition:transform .25s, border-color .25s, box-shadow .25s;
+  }
+  .card::before{
+    content:''; position:absolute; inset:0; opacity:0;
+    background:radial-gradient(220px circle at var(--mx,50%) var(--my,50%), #3fddc422, transparent 60%);
+    transition:opacity .3s; pointer-events:none;
+  }
+  .card:hover{ transform:translateY(-6px); border-color:#3fddc466; box-shadow:0 22px 44px -18px #00000099; }
+  .card:hover::before{ opacity:1; }
+
+  .card-photo{
+    width:100%; aspect-ratio:4/3; border-radius:10px; overflow:hidden;
+    margin-bottom:18px; background:#04141c; border:1px solid var(--line);
+    position:relative;
+  }
+  .card-photo img{
+    width:100%; height:100%; object-fit:cover; display:block;
+    transition:transform .5s ease;
+  }
+  .card:hover .card-photo img{ transform:scale(1.06); }
+
+  .card-top{ display:flex; justify-content:flex-end; align-items:flex-start; margin-bottom:12px; }
+
+  .stock{
+    font-family:'JetBrains Mono',monospace; font-size:.66rem; letter-spacing:.06em;
+    color:var(--slate); display:flex; align-items:center; gap:6px;
+  }
+  .stock .dot{ width:6px; height:6px; border-radius:50%; background:#4ade80; box-shadow:0 0 6px #4ade80; }
+
+  .card h4{ font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:1.12rem; margin-bottom:6px; }
+  .card .spec{ color:var(--slate); font-size:.86rem; margin-bottom:16px; min-height:38px; }
+  .card .price-row{ display:flex; align-items:baseline; justify-content:space-between; margin-bottom:6px; }
+  .price{ font-family:'JetBrains Mono',monospace; font-size:1.28rem; font-weight:700; color:var(--foam); }
+  .price small{ display:block; font-size:.62rem; color:var(--slate); font-weight:400; letter-spacing:.08em; }
+
+  .credit-row{
+    display:flex; align-items:center; gap:8px; margin-bottom:18px;
+    padding:9px 12px; border-radius:8px; background:var(--gold-dim); border:1px solid #d4af3740;
+  }
+  .credit-row svg{ width:15px; height:15px; color:var(--gold); flex-shrink:0; }
+  .credit-row span{ font-family:'JetBrains Mono',monospace; font-size:.72rem; color:var(--gold); }
+  .credit-row b{ color:var(--foam); }
+
+  .card-btn{
+    width:100%; text-align:center; padding:12px; border-radius:9px;
+    background:#0f303dcc; border:1px solid var(--line); color:var(--foam);
+    font-size:.85rem; font-weight:600; transition:all .2s; display:block;
+  }
+  .card-btn:hover{ background:var(--teal); color:#052420; border-color:var(--teal); }
+
+  /* ---------- offers ---------- */
+  .offers-grid{ display:grid; grid-template-columns:1.1fr .9fr; gap:22px; }
+  .offer-main{
+    background:linear-gradient(135deg, #0d2733, #163a49);
+    border:1px solid #3fddc444; border-radius:18px; padding:44px;
+    position:relative; overflow:hidden;
+  }
+  .offer-main::after{
+    content:''; position:absolute; right:-60px; top:-60px; width:220px; height:220px;
+    background:radial-gradient(circle, #3fddc433, transparent 70%);
+  }
+  .offer-tag{
+    font-family:'JetBrains Mono',monospace; font-size:.68rem; letter-spacing:.14em;
+    color:var(--coral); text-transform:uppercase; margin-bottom:14px; display:block;
+  }
+  .offer-main h3{ font-size:1.7rem; margin-bottom:12px; max-width:420px; }
+  .offer-main p{ color:var(--slate); max-width:420px; margin-bottom:24px; }
+  .offer-price{ font-family:'JetBrains Mono',monospace; }
+  .offer-price .old{ color:var(--slate); text-decoration:line-through; font-size:.95rem; margin-right:10px; }
+  .offer-price .new{ color:var(--gold); font-size:1.7rem; font-weight:700; }
+
+  .offer-side{ display:flex; flex-direction:column; gap:22px; }
+  .offer-card{
+    flex:1; background:var(--abyss-2); border:1px solid var(--line); border-radius:16px;
+    padding:26px; display:flex; flex-direction:column; justify-content:space-between;
+  }
+  .offer-card h4{ font-size:1.05rem; margin-bottom:8px; }
+  .offer-card p{ color:var(--slate); font-size:.86rem; margin-bottom:16px; }
+
+  /* ---------- about ---------- */
+  .about-wrap{ display:grid; grid-template-columns:.9fr 1.1fr; gap:60px; align-items:center; }
+  .about-copy h2{ font-size:clamp(1.7rem,3vw,2.3rem); margin-bottom:20px; }
+  .about-copy p{ color:var(--slate); margin-bottom:16px; }
+  .stat-row{ display:flex; gap:36px; margin-top:32px; }
+  .stat b{ display:block; font-family:'JetBrains Mono',monospace; font-size:1.7rem; color:var(--teal); }
+  .stat span{ font-size:.78rem; color:var(--slate); letter-spacing:.03em; }
+
+  .about-panel{
+    background:var(--abyss-2); border:1px solid var(--line); border-radius:18px; padding:34px;
+  }
+  .about-list{ display:flex; flex-direction:column; gap:20px; }
+  .about-list li{ display:flex; gap:14px; list-style:none; }
+  .about-list svg{ width:22px; height:22px; color:var(--gold); flex-shrink:0; margin-top:2px; }
+  .about-list h5{ font-size:.96rem; margin-bottom:3px; }
+  .about-list p{ color:var(--slate); font-size:.84rem; }
+
+  /* ---------- contact / footer ---------- */
+  footer{ border-top:1px solid var(--line); background:#050f17; padding-top:80px; }
+  .contact-grid{ display:grid; grid-template-columns:1fr 1fr; gap:50px; margin-bottom:64px; }
+  .contact-grid h2{ font-size:clamp(1.7rem,3vw,2.3rem); margin-bottom:16px; }
+  .contact-grid > div:first-child p{ color:var(--slate); margin-bottom:28px; max-width:420px; }
+  .contact-methods{ display:flex; flex-direction:column; gap:14px; }
+  .contact-method{
+    display:flex; align-items:center; gap:14px; padding:14px 18px;
+    background:var(--abyss-2); border:1px solid var(--line); border-radius:12px;
+    font-size:.88rem; transition:border-color .2s;
+  }
+  .contact-method:hover{ border-color:var(--teal); }
+  .contact-method svg{ width:20px; height:20px; color:var(--teal); }
+  .contact-method .lbl{ color:var(--slate); font-size:.72rem; display:block; letter-spacing:.05em; }
+
+  .form-card{ background:var(--abyss-2); border:1px solid var(--line); border-radius:16px; padding:30px; }
+  .form-card h4{ margin-bottom:18px; font-size:1.02rem; }
+  .form-row{ display:flex; flex-direction:column; gap:14px; }
+  .form-row input, .form-row select, .form-row textarea{
+    background:#071c26; border:1px solid var(--line); border-radius:9px; padding:12px 14px;
+    color:var(--foam); font-family:'Space Grotesk',sans-serif; font-size:.88rem;
+  }
+  .form-row input:focus, .form-row select:focus, .form-row textarea:focus{
+    outline:none; border-color:var(--teal);
+  }
+  .form-row textarea{ resize:vertical; min-height:80px; }
+
+  .footer-bottom{
+    border-top:1px solid var(--line); padding:26px 0; margin-top:20px;
+    display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:14px;
+  }
+  .footer-bottom .brand .logo-word{ font-size:.85rem; }
+  .socials{ display:flex; gap:14px; }
+  .socials a{
+    width:36px; height:36px; border:1px solid var(--line); border-radius:9px;
+    display:flex; align-items:center; justify-content:center; color:var(--slate);
+    transition:all .2s;
+  }
+  .socials a:hover{ color:var(--teal); border-color:var(--teal); }
+  .footer-bottom small{ color:var(--slate); font-size:.76rem; }
+
+  .whatsapp-float{
+    position:fixed; bottom:24px; right:24px; z-index:60;
+    width:58px; height:58px; border-radius:50%;
+    background:linear-gradient(180deg, #35d399, #1fa87a);
+    display:flex; align-items:center; justify-content:center;
+    box-shadow:0 10px 26px -8px #1fa87aaa;
+    animation:pulse 2.6s ease-in-out infinite;
+  }
+  .whatsapp-float svg{ width:28px; height:28px; color:#052420; }
+  @keyframes pulse{
+    0%,100%{ box-shadow:0 10px 26px -8px #1fa87aaa; }
+    50%{ box-shadow:0 10px 34px -4px #1fa87aee; }
+  }
+
+  /* ---------- responsive ---------- */
+  @media (max-width: 920px){
+    nav.links{ display:none; }
+    .burger{ display:inline-flex; }
+    .grid{ grid-template-columns:repeat(2,1fr); }
+    .trust .wrap{ grid-template-columns:repeat(2,1fr); padding:22px; }
+    .offers-grid{ grid-template-columns:1fr; }
+    .about-wrap{ grid-template-columns:1fr; }
+    .contact-grid{ grid-template-columns:1fr; }
+  }
+  @media (max-width: 560px){
+    .grid{ grid-template-columns:1fr; }
+    .nav-cta{ display:none; }
+    .hero{ padding:90px 20px 70px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="ocean-bg"></div>
+<div class="caustics"></div>
+<div class="bubbles" id="bubbles"></div>
+
+<!-- ===== HEADER ===== -->
+<header>
+  <div class="nav wrap">
+    <div class="brand">
+      <svg class="trident" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="color:var(--teal)">
+        <path d="M12 22V9" stroke-width="1.6" stroke-linecap="round"/>
+        <path d="M7 2v4a5 5 0 0 0 5 5 5 5 0 0 0 5-5V2" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M7 2c0 2 1 3 0 5M17 2c0 2-1 3 0 5" stroke-width="1.4" stroke-linecap="round"/>
+      </svg>
+      <div class="logo-word">ATLANTIS<small>E-SPORTS ARENA</small></div>
+    </div>
+    <nav class="links">
+      <a href="#catalogo">Catálogo</a>
+      <a href="#ofertas">Ofertas</a>
+      <a href="#nosotros">Nosotros</a>
+      <a href="#contacto">Contacto</a>
+    </nav>
+    <a class="nav-cta" href="https://wa.me/message/FCH5Z3VOHZYJD1" target="_blank" rel="noopener">Hablar con un experto</a>
+    <button class="burger" aria-label="Abrir menú" onclick="document.querySelector('nav.links').classList.toggle('open-mobile')">☰</button>
+  </div>
+</header>
+
+<!-- ===== HERO ===== -->
+<section class="hero">
+  <span class="eyebrow"><span class="dot"></span> NUEVA TEMPORADA · STOCK ACTUALIZADO</span>
+  <h1>La ciudad sumergida <br> donde despierta <span class="gold">tu próxima consola</span></h1>
+  <p class="sub">En Atlantis E-Sports Arena encuentras Xbox Series X/S, PlayStation 5, PS4, PS3, Nintendo Switch y más — reliquias de cada generación, garantizadas, listas para jugar y con crédito directo desde $250.000 de cuota inicial.</p>
+  <div class="hero-ctas">
+    <a href="#catalogo" class="btn btn-primary">Explorar catálogo</a>
+    <a href="https://wa.me/message/FCH5Z3VOHZYJD1" target="_blank" rel="noopener" class="btn btn-ghost">Hablar por WhatsApp</a>
+  </div>
+  <div class="hero-emblem">
+    <svg viewBox="0 0 100 100" fill="none">
+      <circle cx="50" cy="50" r="46" stroke="#3fddc4" stroke-width="1" opacity=".4"/>
+      <circle cx="50" cy="50" r="34" stroke="#d4af37" stroke-width="1" opacity=".5"/>
+      <path d="M50 78V32" stroke="#eaf6f4" stroke-width="2" stroke-linecap="round"/>
+      <path d="M34 18v14a16 16 0 0 0 32 0V18" stroke="#eaf6f4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </div>
+</section>
+
+<!-- ===== TRUST BAR ===== -->
+<div class="trust">
+  <div class="wrap">
+    <div class="trust-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M20 12V7a1 1 0 0 0-.55-.9L12 3 4.55 6.1A1 1 0 0 0 4 7v5c0 5 3.4 8.4 8 9 4.6-.6 8-4 8-9Z" stroke-width="1.5" stroke-linejoin="round"/></svg>
+      <span>Garantía real en todos los equipos</span>
+    </div>
+    <div class="trust-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="1" y="7" width="15" height="11" rx="2" stroke-width="1.5"/><path d="M16 10h3l3 3v5h-6" stroke-width="1.5" stroke-linejoin="round"/><circle cx="6" cy="19" r="1.6" stroke-width="1.5"/><circle cx="17.5" cy="19" r="1.6" stroke-width="1.5"/></svg>
+      <span>Envíos a toda Colombia</span>
+    </div>
+    <div class="trust-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="2" y="5" width="20" height="14" rx="2" stroke-width="1.5"/><path d="M2 10h20" stroke-width="1.5"/></svg>
+      <span>Pago contraentrega y con tarjeta</span>
+    </div>
+    <div class="trust-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 22s8-4 8-11V5l-8-3-8 3v6c0 7 8 11 8 11Z" stroke-width="1.5" stroke-linejoin="round"/><path d="M9 12l2 2 4-4" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span>Equipos verificados antes de enviar</span>
+    </div>
+    <div class="trust-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="9" stroke-width="1.5"/><path d="M8 12h8M12 8v8" stroke-width="1.5" stroke-linecap="round"/></svg>
+      <span>Crédito directo, cuota inicial desde $250.000</span>
+    </div>
+  </div>
+</div>
+
+<!-- ===== CATALOGO ===== -->
+<section id="catalogo">
+  <div class="wrap">
+    <div class="depth"><span class="depth-label">Profundidad — 12m</span></div>
+    <div class="section-head">
+      <h2>El catálogo de la arena</h2>
+      <p>Cada consola es una reliquia recuperada de su propia era. Elige la tuya según la generación que buscas — todas con crédito directo y cuota inicial.</p>
+    </div>
+
+    <!-- Tier: Legendarias -->
+    <div class="tier-block tier-legendary">
+      <div class="tier-title">
+        <h3>Reliquias legendarias</h3>
+        <span class="tier-badge">Generación actual</span>
+      </div>
+      <div class="grid">
+
+        <div class="card">
+          <div class="card-photo"><img src="images/ps5.jpg" alt="PlayStation 5 con control DualSense"></div>
+          <div class="card-top">
+            <span class="stock"><span class="dot"></span>en stock</span>
+          </div>
+          <h4>PlayStation 5</h4>
+          <p class="spec">Edición estándar · incluye control DualSense</p>
+          <div class="price-row">
+            <div class="price">$2.800.000<small>COP</small></div>
+          </div>
+          <div class="credit-row">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="9" stroke-width="1.5"/><path d="M8 12h8M12 8v8" stroke-width="1.5" stroke-linecap="round"/></svg>
+            <span>Cuota inicial <b>$450.000</b></span>
+          </div>
+          <a href="https://wa.me/message/FCH5Z3VOHZYJD1" target="_blank" rel="noopener" class="card-btn">Consultar disponibilidad</a>
+        </div>
+
+        <div class="card">
+          <div class="card-photo"><img src="images/xbox-series-x.jpg" alt="Xbox Series X con control"></div>
+          <div class="card-top">
+            <span class="stock"><span class="dot"></span>en stock</span>
+          </div>
+          <h4>Xbox Series X</h4>
+          <p class="spec">1TB SSD · 4K nativo/120fps · Retrocompatible</p>
+          <div class="price-row">
+            <div class="price">$3.200.000<small>COP</small></div>
+          </div>
+          <div class="credit-row">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="9" stroke-width="1.5"/><path d="M8 12h8M12 8v8" stroke-width="1.5" stroke-linecap="round"/></svg>
+            <span>Cuota inicial <b>$450.000</b></span>
+          </div>
+          <a href="https://wa.me/message/FCH5Z3VOHZYJD1" target="_blank" rel="noopener" class="card-btn">Consultar disponibilidad</a>
+        </div>
+
+        <div class="card">
+          <div class="card-photo"><img src="images/xbox-series-s.jpg" alt="Xbox Series S con control"></div>
+          <div class="card-top">
+            <span class="stock"><span class="dot"></span>en stock</span>
+          </div>
+          <h4>Xbox Series S</h4>
+          <p class="spec">512GB SSD · 1440p/120fps · Todo digital</p>
+          <div class="price-row">
+            <div class="price">$1.800.000<small>COP</small></div>
+          </div>
+          <div class="credit-row">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="9" stroke-width="1.5"/><path d="M8 12h8M12 8v8" stroke-width="1.5" stroke-linecap="round"/></svg>
+            <span>Cuota inicial <b>$350.000</b></span>
+          </div>
+          <a href="https://wa.me/message/FCH5Z3VOHZYJD1" target="_blank" rel="noopener" class="card-btn">Consultar disponibilidad</a>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Tier: Elite -->
+    <div class="tier-block tier-elite">
+      <div class="tier-title">
+        <h3>Reliquias de élite</h3>
+        <span class="tier-badge">Híbridas y portátiles</span>
+      </div>
+      <div class="grid">
+
+        <div class="card">
+          <div class="card-photo"><img src="images/switch-oled.jpg" alt="Nintendo Switch OLED con Joy-Con"></div>
+          <div class="card-top">
+            <span class="stock"><span class="dot"></span>en stock</span>
+          </div>
+          <h4>Nintendo Switch OLED</h4>
+          <p class="spec">Pantalla OLED 7" · 64GB · Modo TV/portátil</p>
+          <div class="price-row">
+            <div class="price">$1.200.000<small>COP</small></div>
+          </div>
+          <div class="credit-row">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="9" stroke-width="1.5"/><path d="M8 12h8M12 8v8" stroke-width="1.5" stroke-linecap="round"/></svg>
+            <span>Cuota inicial <b>$350.000</b></span>
+          </div>
+          <a href="https://wa.me/message/FCH5Z3VOHZYJD1" target="_blank" rel="noopener" class="card-btn">Consultar disponibilidad</a>
+        </div>
+
+        <div class="card">
+          <div class="card-photo"><img src="images/switch-standard.jpg" alt="Nintendo Switch estándar con Joy-Con"></div>
+          <div class="card-top">
+            <span class="stock"><span class="dot"></span>en stock</span>
+          </div>
+          <h4>Nintendo Switch Estándar</h4>
+          <p class="spec">Modelo estándar · 32GB · Joy-Con incluidos</p>
+          <div class="price-row">
+            <div class="price">$1.050.000<small>COP</small></div>
+          </div>
+          <div class="credit-row">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="9" stroke-width="1.5"/><path d="M8 12h8M12 8v8" stroke-width="1.5" stroke-linecap="round"/></svg>
+            <span>Cuota inicial <b>$300.000</b></span>
+          </div>
+          <a href="https://wa.me/message/FCH5Z3VOHZYJD1" target="_blank" rel="noopener" class="card-btn">Consultar disponibilidad</a>
+        </div>
+
+        <div class="card">
+          <div class="card-photo"><img src="images/xbox-one-s.jpg" alt="Xbox One S con control"></div>
+          <div class="card-top">
+            <span class="stock"><span class="dot"></span>en stock</span>
+          </div>
+          <h4>Xbox One S</h4>
+          <p class="spec">1TB · Full HD/4K HDR · Amplia librería</p>
+          <div class="price-row">
+            <div class="price">$950.000<small>COP</small></div>
+          </div>
+          <div class="credit-row">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="9" stroke-width="1.5"/><path d="M8 12h8M12 8v8" stroke-width="1.5" stroke-linecap="round"/></svg>
+            <span>Cuota inicial <b>$300.000</b></span>
+          </div>
+          <a href="https://wa.me/message/FCH5Z3VOHZYJD1" target="_blank" rel="noopener" class="card-btn">Consultar disponibilidad</a>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Tier: Clasicas -->
+    <div class="tier-block tier-clasica">
+      <div class="tier-title">
+        <h3>Reliquias clásicas</h3>
+        <span class="tier-badge">Generaciones anteriores</span>
+      </div>
+      <div class="grid">
+
+        <div class="card">
+          <div class="card-photo"><img src="images/ps4.jpg" alt="PlayStation 4 con control y juego"></div>
+          <div class="card-top">
+            <span class="stock"><span class="dot"></span>en stock</span>
+          </div>
+          <h4>PlayStation 4</h4>
+          <p class="spec">500GB / 1TB · Full HD · Ideal para iniciar</p>
+          <div class="price-row">
+            <div class="price">$1.050.000<small>COP</small></div>
+          </div>
+          <div class="credit-row">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="9" stroke-width="1.5"/><path d="M8 12h8M12 8v8" stroke-width="1.5" stroke-linecap="round"/></svg>
+            <span>Cuota inicial <b>$300.000</b></span>
+          </div>
+          <a href="https://wa.me/message/FCH5Z3VOHZYJD1" target="_blank" rel="noopener" class="card-btn">Consultar disponibilidad</a>
+        </div>
+
+        <div class="card">
+          <div class="card-photo"><img src="images/ps3.jpg" alt="PlayStation 3 con control DualShock"></div>
+          <div class="card-top">
+            <span class="stock"><span class="dot"></span>pocas unidades</span>
+          </div>
+          <h4>PlayStation 3</h4>
+          <p class="spec">Slim · Clásicos de colección</p>
+          <div class="price-row">
+            <div class="price">$700.000<small>COP</small></div>
+          </div>
+          <div class="credit-row">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="9" stroke-width="1.5"/><path d="M8 12h8M12 8v8" stroke-width="1.5" stroke-linecap="round"/></svg>
+            <span>Cuota inicial <b>$250.000</b></span>
+          </div>
+          <a href="https://wa.me/message/FCH5Z3VOHZYJD1" target="_blank" rel="noopener" class="card-btn">Consultar disponibilidad</a>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ===== OFERTAS ===== -->
+<section id="ofertas">
+  <div class="wrap">
+    <div class="depth"><span class="depth-label">Profundidad — 28m</span></div>
+    <div class="section-head">
+      <h2>Tesoros de la temporada</h2>
+      <p>Paquetes armados para quienes quieren llegar a jugar el mismo día.</p>
+    </div>
+
+    <div class="offers-grid">
+      <div class="offer-main">
+        <span class="offer-tag">Pack fundador</span>
+        <h3>PS5 + 2 controles + juego a elección</h3>
+        <p>Consola PlayStation 5 estándar, un segundo control DualSense y un título AAA a elegir entre nuestro catálogo disponible.</p>
+        <div class="offer-price">
+          <span class="old">$3.100.000</span>
+          <span class="new">$2.799.900</span>
+        </div>
+      </div>
+
+      <div class="offer-side">
+        <div class="offer-card">
+          <div>
+            <h4>Combo Xbox Arena</h4>
+            <p>Xbox Series S + 3 meses de Game Pass Ultimate incluidos.</p>
+          </div>
+          <a href="#contacto" class="card-btn">Ver combo</a>
+        </div>
+        <div class="offer-card">
+          <div>
+            <h4>Retro Bundle</h4>
+            <p>PS3 o PS4 + 3 juegos físicos seleccionados por nuestro equipo.</p>
+          </div>
+          <a href="#contacto" class="card-btn">Ver combo</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== NOSOTROS ===== -->
+<section id="nosotros">
+  <div class="wrap">
+    <div class="depth"><span class="depth-label">Profundidad — 45m</span></div>
+    <div class="about-wrap">
+      <div class="about-copy">
+        <h2>Una arena, no una bodega</h2>
+        <p>Atlantis E-Sports Arena nació de un grupo de jugadores cansados de comprar consolas a ciegas. Cada equipo que enviamos pasa por revisión técnica y pruebas de encendido, lectura y conectividad antes de salir de nuestras manos.</p>
+        <p>No vendemos solo hardware: armamos setups, resolvemos dudas técnicas y acompañamos la compra de principio a fin, como en cualquier buena comunidad gamer.</p>
+        <div class="stat-row">
+          <div class="stat"><b>+1.200</b><span>equipos entregados</span></div>
+          <div class="stat"><b>4.9★</b><span>calificación promedio</span></div>
+          <div class="stat"><b>6 meses</b><span>de garantía mínima</span></div>
+        </div>
+      </div>
+      <div class="about-panel">
+        <ul class="about-list">
+          <li>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 2l8 4v6c0 5-3.4 8.4-8 10-4.6-1.6-8-5-8-10V6l8-4Z" stroke-width="1.5" stroke-linejoin="round"/></svg>
+            <div><h5>Equipos verificados</h5><p>Cada consola se enciende y se prueba antes de despacharse.</p></div>
+          </li>
+          <li>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="1" y="7" width="15" height="11" rx="2" stroke-width="1.5"/><path d="M16 10h3l3 3v5h-6" stroke-width="1.5" stroke-linejoin="round"/></svg>
+            <div><h5>Envío asegurado</h5><p>Empaque reforzado y guía de rastreo para todo el país.</p></div>
+          </li>
+          <li>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="9" stroke-width="1.5"/><path d="M12 7v5l3 2" stroke-width="1.5" stroke-linecap="round"/></svg>
+            <div><h5>Soporte post-venta</h5><p>Te acompañamos si algo falla, sin vueltas ni letra pequeña.</p></div>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== CONTACTO / FOOTER ===== -->
+<footer id="contacto">
+  <div class="wrap">
+    <div class="depth"><span class="depth-label">Profundidad — 60m · La entrada</span></div>
+    <div class="contact-grid">
+      <div>
+        <h2>Toca la puerta de Atlantis</h2>
+        <p>Escríbenos y te ayudamos a elegir la consola correcta según tu presupuesto y lo que quieras jugar.</p>
+        <div class="contact-methods">
+          <a class="contact-method" href="https://wa.me/message/FCH5Z3VOHZYJD1" target="_blank" rel="noopener">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 11.5a8.5 8.5 0 0 1-12.4 7.5L3 20l1.1-5.4A8.5 8.5 0 1 1 21 11.5Z" stroke-width="1.5" stroke-linejoin="round"/></svg>
+            <div><span class="lbl">WhatsApp</span>Escríbenos directo</div>
+          </a>
+          <a class="contact-method" href="mailto:mario.ramirez@atlantis">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="2" y="4" width="20" height="16" rx="2" stroke-width="1.5"/><path d="m3 6 9 7 9-7" stroke-width="1.5" stroke-linejoin="round"/></svg>
+            <div><span class="lbl">Correo</span>mario.ramirez@atlantis</div>
+          </a>
+          <a class="contact-method" href="https://www.google.com/maps/search/?api=1&query=Cl.+32+Sur+%2318a-2" target="_blank" rel="noopener">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 22s8-4 8-11V5l-8-3-8 3v6c0 7 8 11 8 11Z" stroke-width="1.5" stroke-linejoin="round"/></svg>
+            <div><span class="lbl">Tienda</span>Cl. 32 Sur #18a-2</div>
+          </a>
+        </div>
+      </div>
+
+      <div class="form-card">
+        <h4>Cuéntanos qué buscas</h4>
+        <div class="form-row">
+          <input type="text" placeholder="Nombre completo">
+          <input type="tel" placeholder="Número de WhatsApp">
+          <select>
+            <option>¿Qué consola te interesa?</option>
+            <option>PlayStation 5</option>
+            <option>Xbox Series X / S</option>
+            <option>Nintendo Switch</option>
+            <option>PS4 / PS3</option>
+            <option>Aún no sé, quiero asesoría</option>
+          </select>
+          <textarea placeholder="Cuéntanos tu presupuesto o lo que buscas jugar..."></textarea>
+          <button type="button" class="btn btn-primary" style="justify-content:center" onclick="alert('¡Gracias! Este formulario es una plantilla — conéctalo a tu WhatsApp, email o CRM para recibir mensajes reales.')">Enviar mensaje</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <div class="brand">
+        <div class="logo-word">ATLANTIS E-SPORTS ARENA</div>
+      </div>
+      <div class="socials">
+        <a href="#" aria-label="Instagram"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="18" height="18" rx="5" stroke-width="1.5"/><circle cx="12" cy="12" r="4" stroke-width="1.5"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg></a>
+        <a href="#" aria-label="TikTok"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M15 3v9.5a3.5 3.5 0 1 1-3-3.47" stroke-width="1.5" stroke-linecap="round"/><path d="M15 3c0 2.2 1.8 4 4 4" stroke-width="1.5" stroke-linecap="round"/></svg></a>
+        <a href="#" aria-label="Facebook"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M14 9h3V6h-3a3 3 0 0 0-3 3v2H8v3h3v6h3v-6h3l1-3h-4V9a1 1 0 0 1 1-1Z" stroke-width="1.4" stroke-linejoin="round"/></svg></a>
+      </div>
+      <small>© 2026 Atlantis E-Sports Arena. Todos los derechos reservados.</small>
+    </div>
+  </div>
+</footer>
+
+<a class="whatsapp-float" href="https://wa.me/message/FCH5Z3VOHZYJD1" target="_blank" rel="noopener" aria-label="Escríbenos por WhatsApp">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 11.5a8.5 8.5 0 0 1-12.4 7.5L3 20l1.1-5.4A8.5 8.5 0 1 1 21 11.5Z" stroke-width="1.6" stroke-linejoin="round"/></svg>
+</a>
+
+<script>
+  // gentle rising bubbles for the ocean atmosphere
+  const bubbleLayer = document.getElementById('bubbles');
+  const total = window.innerWidth < 600 ? 10 : 20;
+  for (let i = 0; i < total; i++) {
+    const b = document.createElement('div');
+    b.className = 'bubble';
+    const size = 4 + Math.random() * 10;
+    b.style.width = size + 'px';
+    b.style.height = size + 'px';
+    b.style.left = Math.random() * 100 + 'vw';
+    b.style.animationDuration = (10 + Math.random() * 14) + 's';
+    b.style.animationDelay = (Math.random() * 14) + 's';
+    bubbleLayer.appendChild(b);
+  }
+
+  // spotlight glow following cursor on cards
+  document.querySelectorAll('.card').forEach(card => {
+    card.addEventListener('mousemove', e => {
+      const r = card.getBoundingClientRect();
+      card.style.setProperty('--mx', (e.clientX - r.left) + 'px');
+      card.style.setProperty('--my', (e.clientY - r.top) + 'px');
+    });
+  });
+
+  // simple mobile nav toggle styling
+  const style = document.createElement('style');
+  style.textContent = `
+    nav.links.open-mobile{
+      display:flex !important; position:absolute; top:100%; left:0; right:0;
+      flex-direction:column; background:#071620f5; padding:20px 28px; gap:18px;
+      border-bottom:1px solid var(--line);
+    }
+  `;
+  document.head.appendChild(style);
+</script>
+
+</body>
+</html>
